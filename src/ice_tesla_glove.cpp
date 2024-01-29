@@ -1,5 +1,8 @@
 //
 // Created by biomech on 29.01.24.
+// Source code for ROS2 control of the IceCube Tesla Glove
+// Maintainer: Martin Økter
+// Area: UiA Grimstad
 //
 
 #include <chrono>
@@ -35,19 +38,19 @@ class IceTeslaGlove : public rclcpp::Node
 {
  public:
   IceTeslaGlove()
-      : Node("ice_tesla_glove")
+      : Node("ice_tesla_glove_controller")
       , RobotFingerForce{0, 0, 0, 0, 0, 0}
       , OperatorFingerPos{0,0,0,0,0,0}
       , ServoMultiplierNormToPos{0,0,0,0,0,0}
       , ForceFeedbackNormToPos{0,0,0,0,0,0}
       , ServoPosGloveOne{0,0,0,0,0,0}
   {
-    pub_servo_glove_pos_ = this->create_publisher<geometry_msgs::msg::Twist>("ice_glove_id1", 10);
+    pub_servo_glove_pos_ = this->create_publisher<geometry_msgs::msg::Twist>("/ice_glove_id1", 10);
     timer_ = this->create_wall_timer(
         10ms, std::bind(&IceTeslaGlove::timer_callback, this));
 
     robot_force_sub_1_ = this->create_subscription<geometry_msgs::msg::Twist>("/robot_force_id1", 10, std::bind(&IceTeslaGlove::update_force_feedback, this, std::placeholders::_1));
-   operator_pos_sub_1_ = this->create_subscription<geometry_msgs::msg::Twist>("/operator_pos_id1", 10, std::bind(&IceTeslaGlove::update_hand_pos_feedback, this, std::placeholders::_1));
+    operator_pos_sub_1_ = this->create_subscription<geometry_msgs::msg::Twist>("/operator_pos_id1", 10, std::bind(&IceTeslaGlove::update_hand_pos_feedback, this, std::placeholders::_1));
   }
 
  private:
