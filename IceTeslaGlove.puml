@@ -1,27 +1,37 @@
 @startuml
 'https://plantuml.com/class-diagram
 
-abstract class AbstractList
-abstract AbstractCollection
-interface List
-interface Collection
 
-List <|-- AbstractList
-Collection <|-- AbstractCollection
-
-Collection <|- List
-AbstractCollection <|- AbstractList
-AbstractList <|-- ArrayList
-
-class ArrayList {
-Object[] elementData
-size()
+struct FingerForceMeasured {
+thumb : double
+index : double
+middle : double
+ring : double
+little : double
+palm : double
 }
 
-enum TimeUnit {
-DAYS
-HOURS
-MINUTES
+struct IceGloveServoPos {
+thumb : int
+index : int
+middle : int
+ring : int
+little : int
+palm : int
 }
+
+class IceTeslaGlove {
++ IceTeslaGlove()
+- timer_callback()
+- calculate_servo_pos()
+- update_force_feedback()
+- update_servo_pos()
+}
+
+IceTeslaGlove --|> Node
+FingerForceMeasured --|> IceTeslaGlove
+IceGloveServoPos --|> IceTeslaGlove
+
+
 
 @enduml
