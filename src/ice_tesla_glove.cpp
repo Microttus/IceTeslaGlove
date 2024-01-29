@@ -67,6 +67,8 @@ class IceTeslaGlove : public rclcpp::Node
     // add force feedback
     // write to servo struct
 
+    // ServoPos = (OperatorFingerPos * Multiplier) - (RobotFingerForce * Multiplier)
+
     ServoPosGloveOne.thumb = static_cast<int>((OperatorFingerPos.thumb*ServoMultiplierNormToPos.thumb)-(RobotFingerForce.thumb*ForceFeedbackNormToPos.thumb));
     ServoPosGloveOne.index = static_cast<int>((OperatorFingerPos.index*ServoMultiplierNormToPos.index)-(RobotFingerForce.index*ForceFeedbackNormToPos.index));
     ServoPosGloveOne.middle = static_cast<int>((OperatorFingerPos.middle*ServoMultiplierNormToPos.middle)-(RobotFingerForce.middle*ForceFeedbackNormToPos.middle));
