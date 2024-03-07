@@ -54,6 +54,7 @@ class FileImport
     // Check if the file is open
     if (!file.is_open()) {
       std::cerr << "Error opening Operator file." << std::endl;
+      std::cerr << tools_directory << std::endl;
       return;
     }
 
