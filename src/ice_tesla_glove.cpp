@@ -16,6 +16,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "geometry_msgs/msg/twist.hpp"
+#include "std_msgs/msg/float64.hpp"
 
 using namespace std::chrono_literals;
 
@@ -175,6 +176,7 @@ class IceTeslaGlove : public rclcpp::Node
     micro_ros_qos_profile.liveliness(rclcpp::LivelinessPolicy::Automatic);
 
     pub_servo_glove_pos_ = this->create_publisher<geometry_msgs::msg::Twist>("/ice_glove_id1", 10);
+    pub_robot_hand_pos_ = this->create_publisher<std_msgs::msg::Float64>("/robot_hand_set_grip", 10);
     timer_ = this->create_wall_timer(10ms, std::bind(&IceTeslaGlove::timer_callback, this));
 
     robot_force_sub_1_ = this->create_subscription<geometry_msgs::msg::Twist>("/robot_force_id1", 10, std::bind(&IceTeslaGlove::update_force_feedback, this, std::placeholders::_1));
@@ -183,6 +185,8 @@ class IceTeslaGlove : public rclcpp::Node
     // Use FileImport class for updating the settings
     FileImporter.import_hand_profiles(name_of_profile, ServoMultiplierNormToPosMin, ServoMultiplierNormToPosMax);
     FileImporter.import_operator_glove_pos_settings(OperatorPositionMin, OperatorPositionMax);
+
+    RCLCPP_INFO(rclcpp::get_logger("IceTeslaGlove"), "ice_tesla_clove_controller configured ...");
 
     std::signal(SIGINT, &IceTeslaGlove::onShutdown);
 
@@ -193,6 +197,7 @@ class IceTeslaGlove : public rclcpp::Node
   {
     calculate_servo_pos();
     update_servo_pos();
+    update_robot_hand_pos();
   }
 
   static void onShutdown(int signum) {
@@ -261,6 +266,16 @@ class IceTeslaGlove : public rclcpp::Node
     pub_servo_glove_pos_->publish(servo_msg);
   }
 
+  // Calculate a middle value to which is published for control of the robotic gripper
+  void update_robot_hand_pos()
+  {
+    auto robot_hand_msg = std_msgs::msg::Float64();
+
+    robot_hand_msg.data = (OperatorFingerPos.thumb + OperatorFingerPos.index + OperatorFingerPos.middle)/3;
+
+    pub_robot_hand_pos_->publish(robot_hand_msg);
+  }
+
   // Function to normalize position values with guard for outliers
   static double to_norm_val_with_guard(float input_val, double upper_val, double lower_val, double last_val=0){
     auto d_input_val = static_cast<double>(input_val);
@@ -302,6 +317,7 @@ class IceTeslaGlove : public rclcpp::Node
 
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub_servo_glove_pos_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr pub_robot_hand_pos_;
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr robot_force_sub_1_;
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr operator_pos_sub_1_;
 
