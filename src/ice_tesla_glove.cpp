@@ -92,7 +92,7 @@ class FileImport
         MaxStruct.middle = std::stod(row[6]);
         MinStruct.ring = std::stod(row[7]);
         MaxStruct.ring = std::stod(row[8]);
-
+        break;
       }
     }
   }
