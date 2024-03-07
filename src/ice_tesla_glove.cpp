@@ -12,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
@@ -41,12 +42,14 @@ struct HandServoPos{
 class FileImport
 {
  public:
-  FileImport()
-  = default;
+  FileImport(){
+    std::string package_name = "ice_tesla_glove";
+    tools_directory = ament_index_cpp::get_package_share_directory(package_name) + "/tools/";
+  };
 
   void import_hand_profiles(const std::string& name_of_profile, HandDouble& MinStruct, HandDouble& MaxStruct) {
     // Open the CSV file
-    std::ifstream file("src/ice_tesla_glove/tools/icecube_tesla_glove_profiles.csv");
+    std::ifstream file(tools_directory + "icecube_tesla_glove_profiles.csv");
 
     // Check if the file is open
     if (!file.is_open()) {
@@ -95,7 +98,7 @@ class FileImport
 
   void import_operator_glove_pos_settings(HandDouble& MinStruct, HandDouble& MaxStruct){
     // Open the CSV file
-    std::ifstream file("src/ice_tesla_glove/tools/operator_finger_pos_cal.csv");
+    std::ifstream file(tools_directory + "operator_finger_pos_cal.csv");
 
     // Check if the file is open
     if (!file.is_open()) {
@@ -150,6 +153,8 @@ class FileImport
       }
     }
   }
+
+  std::string tools_directory;
 };
 
 class IceTeslaGlove : public rclcpp::Node
