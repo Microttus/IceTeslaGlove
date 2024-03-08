@@ -277,7 +277,8 @@ class IceTeslaGlove : public rclcpp::Node
   {
     auto robot_hand_msg = std_msgs::msg::Float64();
 
-    robot_hand_msg.data = (OperatorFingerPos.thumb + OperatorFingerPos.index + OperatorFingerPos.middle)/3;
+    //robot_hand_msg.data = (OperatorFingerPos.thumb + OperatorFingerPos.index + OperatorFingerPos.middle)/3.0;
+    robot_hand_msg.data = OperatorFingerPos.middle;
 
     pub_robot_hand_pos_->publish(robot_hand_msg);
   }
