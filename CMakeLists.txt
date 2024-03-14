@@ -26,7 +26,12 @@ install(DIRECTORY ${tools_directory}
         PATTERN "CMakeLists.txt" EXCLUDE  # Exclude CMakeLists.txt if it's in the 'tools' directory
 )
 
-add_executable(${CMAKE_PROJECT_NAME} src/ice_tesla_glove.cpp)
+add_executable(${CMAKE_PROJECT_NAME} src/ice_tesla_glove.cpp
+        src/file_importer.cc
+        include/ice_tesla_glove/file_importer.h
+        src/struct_lib.cc
+        include/ice_tesla_glove/file_importer.h)
+
 ament_target_dependencies(${CMAKE_PROJECT_NAME} rclcpp std_msgs geometry_msgs)
 
 install(TARGETS
