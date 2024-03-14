@@ -32,7 +32,7 @@ class IceTeslaGlove : public rclcpp::Node
       , RobotFingerForce{0, 0, 0, 0, 0, 0}
       , OperatorFingerPos{0,0,0,0,0,0}
       , OperatorFingerPosServo{0,0,0,0,0,0}
-      , ForceFeedbackNormToPos{0,0,0,0,0,0}
+      , ForceFeedbackNormToPos{50,50,50,50,0,0}
       , ServoMultiplierNormToPosMin{0,0,0,0,0,0}
       , ServoMultiplierNormToPosMax{0,0,0,0,0,0}
       , OperatorPositionMin{0,0,0,0,0,0}
@@ -67,7 +67,8 @@ class IceTeslaGlove : public rclcpp::Node
  private:
   void timer_callback()
   {
-    calculate_servo_pos();
+    //calculate_servo_pos(); //If not i2c feedforward is used
+    calculate_servo_pos_feedforward();
     update_servo_pos();
     update_robot_hand_pos();
   }
@@ -99,6 +100,16 @@ class IceTeslaGlove : public rclcpp::Node
     ServoPosGloveOne.ring = static_cast<int>((OperatorFingerPosServo.ring)-(RobotFingerForce.ring*ForceFeedbackNormToPos.ring));
     ServoPosGloveOne.little = static_cast<int>((OperatorFingerPosServo.little)-(RobotFingerForce.little*ForceFeedbackNormToPos.little));
     ServoPosGloveOne.palm = static_cast<int>((OperatorFingerPosServo.palm)-(RobotFingerForce.palm*ForceFeedbackNormToPos.palm));
+  }
+
+  void calculate_servo_pos_feedforward()
+  {
+    ServoPosGloveOne.thumb = static_cast<int>((RobotFingerForce.thumb*ForceFeedbackNormToPos.thumb));
+    ServoPosGloveOne.index = static_cast<int>((RobotFingerForce.index*ForceFeedbackNormToPos.index));
+    ServoPosGloveOne.middle = static_cast<int>((RobotFingerForce.middle*ForceFeedbackNormToPos.middle));
+    ServoPosGloveOne.ring = static_cast<int>((RobotFingerForce.ring*ForceFeedbackNormToPos.ring));
+    ServoPosGloveOne.little = static_cast<int>((RobotFingerForce.little*ForceFeedbackNormToPos.little));
+    ServoPosGloveOne.palm = static_cast<int>((RobotFingerForce.palm*ForceFeedbackNormToPos.palm));
   }
 
   // Read and updates the force exerted ion the fingertip of the robot and
