@@ -21,6 +21,7 @@
 
 //#include "struct_lib.cc"
 #include "../include/ice_tesla_glove/file_importer.h"
+#include "../include/ice_tesla_glove/ice_glove_math.h"
 
 using namespace std::chrono_literals;
 
@@ -29,6 +30,7 @@ class IceTeslaGlove : public rclcpp::Node
  public:
   IceTeslaGlove()
       : Node("ice_tesla_glove_controller")
+      , callback_time(10)
       , RobotFingerForce{0, 0, 0, 0, 0, 0}
       , OperatorFingerPos{0,0,0,0,0,0}
       , OperatorFingerPosServo{0,0,0,0,0,0}
@@ -38,6 +40,8 @@ class IceTeslaGlove : public rclcpp::Node
       , OperatorPositionMin{0,0,0,0,0,0}
       , OperatorPositionMax{0,0,0,0,0,0}
       , ServoPosGloveOne{0,0,0,0,0,0}
+      , ForceOperator({{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}})
+      , RightHand({{0, 0, 0, 0, 0, ForceOperator.thumb}, {0,0,0,0, 0, ForceOperator.index}, {0,0,0,0, 0, ForceOperator.middle}, {0,0,0,0, 0, ForceOperator.ring}, {0,0,0,0,0,ForceOperator.little}, {0,0,0,0,0,ForceOperator.palm}})
       , name_of_profile("proto_1")
   {
     rclcpp::QoS micro_ros_qos_profile(rclcpp::KeepLast(10));
@@ -51,7 +55,8 @@ class IceTeslaGlove : public rclcpp::Node
     pub_robot_hand_pos_ = this->create_publisher<std_msgs::msg::Float64>("/robot_hand_set_grip", 10);
     timer_ = this->create_wall_timer(10ms, std::bind(&IceTeslaGlove::timer_callback, this));
 
-    robot_force_sub_1_ = this->create_subscription<geometry_msgs::msg::Twist>("/robot_force_id1", 10, std::bind(&IceTeslaGlove::update_force_feedback, this, std::placeholders::_1));
+    // This one can be changed between use of motor force or fingertip sensors
+    robot_force_sub_1_ = this->create_subscription<geometry_msgs::msg::Twist>("/robot_finger_force_id1", 10, std::bind(&IceTeslaGlove::update_force_feedback, this, std::placeholders::_1));
     operator_pos_sub_1_ = this->create_subscription<geometry_msgs::msg::Twist>("/ice_glove_pos_id1", micro_ros_qos_profile, std::bind(&IceTeslaGlove::update_hand_pos_feedback, this, std::placeholders::_1));
 
     // Use FileImport class for updating the settings
@@ -67,8 +72,9 @@ class IceTeslaGlove : public rclcpp::Node
  private:
   void timer_callback()
   {
-    //calculate_servo_pos(); //If not i2c feedforward is used
-    calculate_servo_pos_feedforward();
+    //calculate_servo_pos();              // If not i2c feedforward is used
+    //calculate_servo_pos_feedforward();  // Use if for feedforward
+    calculate_servo_pos_springs();        // Use if admittance calc feedback are to be used
     update_servo_pos();
     update_robot_hand_pos();
   }
@@ -112,6 +118,16 @@ class IceTeslaGlove : public rclcpp::Node
     ServoPosGloveOne.palm = static_cast<int>((RobotFingerForce.palm*ForceFeedbackNormToPos.palm));
   }
 
+  void calculate_servo_pos_springs()
+  {
+    ServoPosGloveOne.thumb = static_cast<int>(igm.admittance_calc(RightHand.thumb ,RobotFingerForce.thumb, callback_time));
+    ServoPosGloveOne.index = static_cast<int>(igm.admittance_calc(RightHand.index, RobotFingerForce.index, callback_time));
+    ServoPosGloveOne.middle = static_cast<int>(igm.admittance_calc(RightHand.middle, RobotFingerForce.middle, callback_time));
+    ServoPosGloveOne.ring = static_cast<int>(igm.admittance_calc(RightHand.ring, RobotFingerForce.ring, callback_time));
+    ServoPosGloveOne.little = static_cast<int>(igm.admittance_calc(RightHand.little, RobotFingerForce.little, callback_time));
+    ServoPosGloveOne.palm = static_cast<int>(igm.admittance_calc(RightHand.palm, RobotFingerForce.palm, callback_time));
+  }
+
   // Read and updates the force exerted ion the fingertip of the robot and
   void update_force_feedback(geometry_msgs::msg::Twist::SharedPtr msg)
   {
@@ -126,12 +142,12 @@ class IceTeslaGlove : public rclcpp::Node
   // Read and updates the pos feedback from the load cell of the operator glove
   void update_hand_pos_feedback(geometry_msgs::msg::Twist::SharedPtr msg)
   {
-    OperatorFingerPos.thumb = to_norm_val_with_guard(float(msg->linear.x), OperatorPositionMax.thumb, OperatorPositionMin.thumb, OperatorFingerPos.thumb);
-    OperatorFingerPos.index = to_norm_val_with_guard(float(msg->linear.y), OperatorPositionMax.index, OperatorPositionMin.index, OperatorFingerPos.index);
-    OperatorFingerPos.middle = to_norm_val_with_guard(float(msg->linear.z), OperatorPositionMax.middle, OperatorPositionMin.middle, OperatorFingerPos.middle);
-    OperatorFingerPos.ring = to_norm_val_with_guard(float(msg->angular.x), OperatorPositionMax.ring, OperatorPositionMin.ring, OperatorFingerPos.ring);
-    OperatorFingerPos.little = to_norm_val_with_guard(float(msg->angular.y), OperatorPositionMax.little, OperatorPositionMin.little, OperatorFingerPos.little);
-    OperatorFingerPos.palm = to_norm_val_with_guard(float(msg->angular.z), OperatorPositionMax.palm, OperatorPositionMin.palm, OperatorFingerPos.palm);
+    OperatorFingerPos.thumb = igm.to_norm_val_with_guard(float(msg->linear.x), OperatorPositionMax.thumb, OperatorPositionMin.thumb, OperatorFingerPos.thumb);
+    OperatorFingerPos.index = igm.to_norm_val_with_guard(float(msg->linear.y), OperatorPositionMax.index, OperatorPositionMin.index, OperatorFingerPos.index);
+    OperatorFingerPos.middle = igm.to_norm_val_with_guard(float(msg->linear.z), OperatorPositionMax.middle, OperatorPositionMin.middle, OperatorFingerPos.middle);
+    OperatorFingerPos.ring = igm.to_norm_val_with_guard(float(msg->angular.x), OperatorPositionMax.ring, OperatorPositionMin.ring, OperatorFingerPos.ring);
+    OperatorFingerPos.little = igm.to_norm_val_with_guard(float(msg->angular.y), OperatorPositionMax.little, OperatorPositionMin.little, OperatorFingerPos.little);
+    OperatorFingerPos.palm = igm.to_norm_val_with_guard(float(msg->angular.z), OperatorPositionMax.palm, OperatorPositionMin.palm, OperatorFingerPos.palm);
   }
 
   // Write the updated servo position values to the glove topic
@@ -162,30 +178,17 @@ class IceTeslaGlove : public rclcpp::Node
     pub_robot_hand_pos_->publish(robot_hand_msg);
   }
 
-  // Function to normalize position values with guard for outliers
-  static double to_norm_val_with_guard(float input_val, double upper_val, double lower_val, double last_val=0){
-    auto d_input_val = static_cast<double>(input_val);
-    if (d_input_val > upper_val or d_input_val < lower_val) {
-      return last_val;
-    } else {
-      return (d_input_val - lower_val) / (upper_val - lower_val);
-    }
-  }
-
-  double map_output(double in_val, double out_min, double out_max){
-    return (in_val - 0.0f) * (out_max - out_min) / (1.0f - 0.0f) + out_min;
-  }
-
   // Function to set position values according to profile
   void to_operator_profile_servo_pos(){
-    OperatorFingerPosServo.thumb = map_output(OperatorFingerPos.thumb, ServoMultiplierNormToPosMin.thumb, ServoMultiplierNormToPosMax.thumb);
-    OperatorFingerPosServo.index = map_output(OperatorFingerPos.index, ServoMultiplierNormToPosMin.index, ServoMultiplierNormToPosMax.index);
-    OperatorFingerPosServo.middle = map_output(OperatorFingerPos.middle, ServoMultiplierNormToPosMin.middle, ServoMultiplierNormToPosMax.middle);
-    OperatorFingerPosServo.ring = map_output(OperatorFingerPos.ring, ServoMultiplierNormToPosMin.ring, ServoMultiplierNormToPosMax.ring);
-    OperatorFingerPosServo.little = map_output(OperatorFingerPos.little, ServoMultiplierNormToPosMin.little, ServoMultiplierNormToPosMax.little);
-    OperatorFingerPosServo.palm = map_output(OperatorFingerPos.palm, ServoMultiplierNormToPosMin.palm, ServoMultiplierNormToPosMax.palm);
+    OperatorFingerPosServo.thumb = igm.map_output(OperatorFingerPos.thumb, ServoMultiplierNormToPosMin.thumb, ServoMultiplierNormToPosMax.thumb);
+    OperatorFingerPosServo.index = igm.map_output(OperatorFingerPos.index, ServoMultiplierNormToPosMin.index, ServoMultiplierNormToPosMax.index);
+    OperatorFingerPosServo.middle = igm.map_output(OperatorFingerPos.middle, ServoMultiplierNormToPosMin.middle, ServoMultiplierNormToPosMax.middle);
+    OperatorFingerPosServo.ring = igm.map_output(OperatorFingerPos.ring, ServoMultiplierNormToPosMin.ring, ServoMultiplierNormToPosMax.ring);
+    OperatorFingerPosServo.little = igm.map_output(OperatorFingerPos.little, ServoMultiplierNormToPosMin.little, ServoMultiplierNormToPosMax.little);
+    OperatorFingerPosServo.palm = igm.map_output(OperatorFingerPos.palm, ServoMultiplierNormToPosMin.palm, ServoMultiplierNormToPosMax.palm);
   }
 
+  int callback_time;
 
   HandDouble RobotFingerForce;
   HandDouble OperatorFingerPos;
@@ -199,7 +202,12 @@ class IceTeslaGlove : public rclcpp::Node
 
   HandServoPos ServoPosGloveOne;
 
+  HandSpring ForceOperator;
+  HandStorage RightHand;
+
   FileImport FileImporter;
+  IceGloveMath igm;
+
 
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub_servo_glove_pos_;

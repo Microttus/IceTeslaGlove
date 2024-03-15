@@ -30,7 +30,10 @@ add_executable(${CMAKE_PROJECT_NAME} src/ice_tesla_glove.cpp
         src/file_importer.cc
         include/ice_tesla_glove/file_importer.h
         src/struct_lib.cc
-        include/ice_tesla_glove/file_importer.h)
+        include/ice_tesla_glove/file_importer.h
+        src/ice_glove_math.cc
+        include/ice_tesla_glove/ice_glove_math.h
+)
 
 ament_target_dependencies(${CMAKE_PROJECT_NAME} rclcpp std_msgs geometry_msgs)
 
