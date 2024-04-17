@@ -14,7 +14,7 @@
 #include <sstream>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
-#include "../../src/struct_lib.cc"
+#include "haptic_structs.h"
 
 class FileImport
 {

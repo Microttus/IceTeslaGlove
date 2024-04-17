@@ -4,6 +4,8 @@
 
 #include "../include/ice_tesla_glove/file_importer.h"
 
+#include "../include/ice_tesla_glove/haptic_structs.h"
+
 FileImport::FileImport()
 {
   std::string package_name = "ice_tesla_glove";

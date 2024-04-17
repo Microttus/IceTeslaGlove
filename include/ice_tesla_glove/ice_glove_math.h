@@ -5,7 +5,7 @@
 #ifndef ICE_TESLA_GLOVE_SRC_ICE_GLOVE_MATH_H_
 #define ICE_TESLA_GLOVE_SRC_ICE_GLOVE_MATH_H_
 
-#include "../../src/struct_lib.cc"
+#include "haptic_structs.h"
 
 class IceGloveMath {
  public:

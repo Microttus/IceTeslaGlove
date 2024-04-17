@@ -4,6 +4,8 @@
 
 #include "../include/ice_tesla_glove/ice_glove_math.h"
 
+#include "../include/ice_tesla_glove/haptic_structs.h"
+
 double IceGloveMath::map_output(double in_val, double out_min, double out_max){
   return (in_val - 0.0f) * (out_max - out_min) / (1.0f - 0.0f) + out_min;
 }

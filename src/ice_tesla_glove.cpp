@@ -19,7 +19,7 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "std_msgs/msg/float64.hpp"
 
-//#include "struct_lib.cc"
+#include "../include/ice_tesla_glove/haptic_structs.h"
 #include "../include/ice_tesla_glove/file_importer.h"
 #include "../include/ice_tesla_glove/ice_glove_math.h"
 
