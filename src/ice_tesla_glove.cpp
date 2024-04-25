@@ -40,7 +40,7 @@ class IceTeslaGlove : public rclcpp::Node
       , OperatorPositionMin{0,0,0,0,0,0}
       , OperatorPositionMax{0,0,0,0,0,0}
       , ServoPosGloveOne{0,0,0,0,0,0}
-      , ForceOperator({{1,0,0.1},{1,0,0.1},{1,0,0.1},{1,0,0.1},{1,0,0},{0,0,0}})
+      , ForceOperator({{1,0,0},{1,0,0},{1,0,0},{1,0,0},{1,0,0},{0,0,0}})
       , RightHand({{0, 0, 0, 0, 0, ForceOperator.thumb}, {0,0,0,0, 0, ForceOperator.index}, {0,0,0,0, 0, ForceOperator.middle}, {0,0,0,0, 0, ForceOperator.ring}, {0,0,0,0,0,ForceOperator.little}, {0,0,0,0,0,ForceOperator.palm}})
       , name_of_profile("proto_1")
   {
