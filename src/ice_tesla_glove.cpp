@@ -30,7 +30,7 @@ class IceTeslaGlove : public rclcpp::Node
  public:
   IceTeslaGlove()
       : Node("ice_tesla_glove_controller")
-      , callback_time(10)
+      , callback_time(100)
       , RobotFingerForce{0, 0, 0, 0, 0, 0}
       , OperatorFingerPos{0,0,0,0,0,0}
       , OperatorFingerPosServo{0,0,0,0,0,0}
@@ -40,7 +40,7 @@ class IceTeslaGlove : public rclcpp::Node
       , OperatorPositionMin{0,0,0,0,0,0}
       , OperatorPositionMax{0,0,0,0,0,0}
       , ServoPosGloveOne{0,0,0,0,0,0}
-      , ForceOperator({{1,0,0},{1,0,0},{1,0,0},{1,0,0},{1,0,0},{0,0,0}})
+      , ForceOperator({{0.05,0,0},{0.05,0,0},{0.05,0,0},{0.05,0,0},{100,0,0},{100,0,0}})
       , RightHand({{0, 0, 0, 0, 0, ForceOperator.thumb}, {0,0,0,0, 0, ForceOperator.index}, {0,0,0,0, 0, ForceOperator.middle}, {0,0,0,0, 0, ForceOperator.ring}, {0,0,0,0,0,ForceOperator.little}, {0,0,0,0,0,ForceOperator.palm}})
       , name_of_profile("proto_1")
   {
@@ -53,7 +53,7 @@ class IceTeslaGlove : public rclcpp::Node
 
     pub_servo_glove_pos_ = this->create_publisher<geometry_msgs::msg::Twist>("/ice_glove_id1", 10);
     pub_robot_hand_pos_ = this->create_publisher<std_msgs::msg::Float64>("/robot_hand_set_grip", 10);
-    timer_ = this->create_wall_timer(10ms, std::bind(&IceTeslaGlove::timer_callback, this));
+    timer_ = this->create_wall_timer(100ms, std::bind(&IceTeslaGlove::timer_callback, this));
 
     // This one can be changed between use of motor force or fingertip sensors
     robot_force_sub_1_ = this->create_subscription<geometry_msgs::msg::Twist>("/robot_finger_force_id1", micro_ros_qos_profile, std::bind(&IceTeslaGlove::update_force_feedback, this, std::placeholders::_1));
