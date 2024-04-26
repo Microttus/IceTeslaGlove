@@ -56,7 +56,7 @@ class IceTeslaGlove : public rclcpp::Node
     timer_ = this->create_wall_timer(10ms, std::bind(&IceTeslaGlove::timer_callback, this));
 
     // This one can be changed between use of motor force or fingertip sensors
-    robot_force_sub_1_ = this->create_subscription<geometry_msgs::msg::Twist>("/robot_finger_force_id1", 10, std::bind(&IceTeslaGlove::update_force_feedback, this, std::placeholders::_1));
+    robot_force_sub_1_ = this->create_subscription<geometry_msgs::msg::Twist>("/robot_finger_force_id1", micro_ros_qos_profile, std::bind(&IceTeslaGlove::update_force_feedback, this, std::placeholders::_1));
     operator_pos_sub_1_ = this->create_subscription<geometry_msgs::msg::Twist>("/ice_glove_pos_id1", micro_ros_qos_profile, std::bind(&IceTeslaGlove::update_hand_pos_feedback, this, std::placeholders::_1));
 
     // Use FileImport class for updating the settings
