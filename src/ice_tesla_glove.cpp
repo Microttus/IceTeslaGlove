@@ -126,6 +126,8 @@ class IceTeslaGlove : public rclcpp::Node
     ServoPosGloveOne.ring = static_cast<int>(igm.admittance_calc(RightHand.ring, RobotFingerForce.ring, callback_time));
     ServoPosGloveOne.little = static_cast<int>(igm.admittance_calc(RightHand.little, RobotFingerForce.little, callback_time));
     ServoPosGloveOne.palm = static_cast<int>(igm.admittance_calc(RightHand.palm, RobotFingerForce.palm, callback_time));
+
+    std::cout << "RobotFingerForce.thumb: " << RobotFingerForce.thumb << std::endl;
   }
 
   // Read and updates the force exerted ion the fingertip of the robot and
