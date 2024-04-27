@@ -35,8 +35,8 @@ class IceTeslaGlove : public rclcpp::Node
       , OperatorFingerPos{0,0,0,0,0,0}
       , OperatorFingerPosServo{0,0,0,0,0,0}
       , ForceFeedbackNormToPos{50,50,50,50,0,0}
-      , ServoMultiplierNormToPosMin{0,0,0,0,0,0}
-      , ServoMultiplierNormToPosMax{0,0,0,0,0,0}
+      , ServoMultiplierNormToPosMin{130,120,100,140,0,0}
+      , ServoMultiplierNormToPosMax{40,60,160,60,0,0}
       , OperatorPositionMin{0,0,0,0,0,0}
       , OperatorPositionMax{0,0,0,0,0,0}
       , ServoPosGloveOne{0,0,0,0,0,0}
@@ -150,6 +150,8 @@ class IceTeslaGlove : public rclcpp::Node
     OperatorFingerPos.ring = igm.to_norm_val_with_guard(float(msg->angular.x), OperatorPositionMax.ring, OperatorPositionMin.ring, OperatorFingerPos.ring);
     OperatorFingerPos.little = igm.to_norm_val_with_guard(float(msg->angular.y), OperatorPositionMax.little, OperatorPositionMin.little, OperatorFingerPos.little);
     OperatorFingerPos.palm = igm.to_norm_val_with_guard(float(msg->angular.z), OperatorPositionMax.palm, OperatorPositionMin.palm, OperatorFingerPos.palm);
+
+    std::cout << OperatorFingerPos.thumb << std::endl;
   }
 
   // Write the updated servo position values to the glove topic
