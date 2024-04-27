@@ -37,8 +37,8 @@ class IceTeslaGlove : public rclcpp::Node
       , ForceFeedbackNormToPos{50,50,50,50,0,0}
       , ServoMultiplierNormToPosMin{130,120,100,140,0,0}
       , ServoMultiplierNormToPosMax{40,60,160,60,0,0}
-      , OperatorPositionMin{0,0,0,0,0,0}
-      , OperatorPositionMax{0,0,0,0,0,0}
+      , OperatorPositionMin{70,110,150,130,100,0}
+      , OperatorPositionMax{160,180,200,200,180,0}
       , ServoPosGloveOne{0,0,0,0,0,0}
       , ForceOperator({{0.05,0,0},{0.05,0,0},{0.05,0,0},{0.05,0,0},{100,0,0},{100,0,0}})
       , RightHand({{0, 0, 0, 0, 0, ForceOperator.thumb}, {0,0,0,0, 0, ForceOperator.index}, {0,0,0,0, 0, ForceOperator.middle}, {0,0,0,0, 0, ForceOperator.ring}, {0,0,0,0,0,ForceOperator.little}, {0,0,0,0,0,ForceOperator.palm}})
